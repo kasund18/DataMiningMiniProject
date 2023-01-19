@@ -1,0 +1,116 @@
+<script>
+    function MyFunction(aggregate) {
+        keyword = aggregate.name;
+        console.log("keyword: " + keyword);
+        songs_array = document.getElementsByClassName('search-result row');
+        songs_array = Array.from(songs_array);
+        matching_songs = songs_array.filter(keyword_filter, keyword);
+        len_matching = matching_songs.length;
+        len_original = songs_array.length;
+        section = document.getElementById('song_section');
+        section.innerHTML = matching_songs.map(e => e.outerHTML).join()
+        console.log(section);
+        header = document.getElementById('results');
+        header.innerHTML = `<h2 class="lead" id="results"><strong class="text-danger">${len_matching}</strong> results out of ${len_original} matches the criteria</h2>`;
+
+        var tags_ul = document.getElementById("tags");
+        var tags_li = document.createElement("li");
+        tags_li.setAttribute("style", "display:inline-block; padding:20px; margin:10px; border: 3px solid green; border-radius: 10px;");
+        tags_li.appendChild(document.createTextNode(keyword));
+        tags_ul.appendChild(tags_li);
+    }
+
+    function keyword_filter(element) {
+        keyword = this;
+        content = element.innerText;
+        return content.includes(keyword)
+    }
+</script>
+
+<div class="container">
+    <hgroup class="mb20">
+        <h1 style="background-color:rgb(176, 147, 224) ;">
+            <center>Sinhala Songs Lyrics Search Engine</center>
+        </h1>
+        <h3 class="lead">
+            <center>Enter the Search Query!</center>
+            </strong>
+        </h3>
+    </hgroup>
+    <form action="http://127.0.0.1:5000/" method="post" align="center">
+        <input type="text" class="searchTerm" name="searchTerm" placeholder="Type here to search songs">
+        <input type="submit" value="Submit">
+    </form>
+
+    {% if hits %}
+
+    <head>
+        <title>Song Search</title>
+    </head>
+    <hgroup class="mb20">
+        <center>
+            <h2><i><u>Search Results</u></i></h2>
+            <h3 class="lead" id="results"><strong class="text-danger">{{ num_results }}</strong> results founded for : <strong class="text-danger">{{  query  }}</strong></h3>
+        </center>
+    </hgroup>
+
+
+    <section id='song_section' class="col-md-8">
+        {% for hit in hits %}
+        <center>
+            <article class="search-result row center">
+                <div class="col-md-12">
+                    <h3 style="color:rgb(235, 15, 15);">{{ hit._source.title }}</h3>
+                    <ul style="list-style-position: inside;">
+                        <li style="text-align: center;">Artist :- {{ hit._source.artist }}</li>
+                        <li style="text-align: center;">Genre :- {{ hit._source.genre }} </li>
+                        <li style="text-align: center;">Writer :- {{ hit._source.writer }}</li>
+                        <li style="text-align: center;">Music :- {{ hit._source.music }}</li>
+                        <li style="text-align: center;">Lyrics :- </li>
+                    </ul>
+                    <p style="white-space: pre-line">{{ hit._source.lyrics }}</p>
+                    <table class="table">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Metaphors</th>
+                                <th scope="col">Meaning</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for metaphor in hit._source.metaphor %}
+                            <tr>
+                                <td>{{ metaphor["lyrics_part"] }} - </td>
+                                <td>{{ metaphor["meaning"] }} </td>
+
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+
+                </div>
+                <span class="clearfix borda"></span>
+            </article>
+        </center>
+
+        {% endfor %}
+    </section>
+
+
+    {% else %} {% if init %}
+
+    <head>
+        <title>Song Search</title>
+    </head>
+
+
+    {% else %}
+    <hgroup class="mb20">
+        <center>
+            <h2><i><u>Search Results</u></i></h2>
+            <h3 class="lead"><strong class="text-danger">No</strong> results found for : <strong class="text-danger">{{  query  }}</strong></h3>
+        </center>
+    </hgroup>
+    {% endif %} {% endif %}
+</div>
